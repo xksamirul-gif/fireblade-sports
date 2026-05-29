@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Extended user profile with gaming stats and gamification state.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "balance": { "type": "number" },
+        "role": { "type": "string", "enum": ["admin", "player", "agent"] },
+        "ffIgn": { "type": "string" },
+        "ffUid": { "type": "string" },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "totalWinnings": { "type": "number" },
+        "kills": { "type": "number" },
+        "matchesPlayed": { "type": "number" },
+        "wins": { "type": "number" },
+        "lastCheckIn": { "type": "string", "format": "date-time" },
+        "referralCode": { "type": "string" },
+        "referredBy": { "type": "string" },
+        "badges": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["userId", "displayName", "email", "balance", "role"]
+    },
+    "Match": {
+      "title": "Tournament Match",
+      "description": "Details about an eSports match.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "map": { "type": "string" },
+        "type": { "type": "string", "enum": ["Solo", "Duo", "Squad"] },
+        "entryFee": { "type": "number" },
+        "totalPrize": { "type": "number" },
+        "slots": { "type": "number" },
+        "joinedCount": { "type": "number" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
+        "roomId": { "type": "string" },
+        "roomPassword": { "type": "string" }
+      }
+    },
+    "Registration": {
+      "title": "Player Registration",
+      "description": "Links a player to a match with assigned slot.",
+      "type": "object",
+      "properties": {
+        "matchId": { "type": "string" },
+        "userId": { "type": "string" },
+        "gameName": { "type": "string" },
+        "slotNumber": { "type": "number" },
+        "status": { "type": "string", "enum": ["joined", "kicked"] },
+        "joinedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ChatMessage": {
+      "title": "Squad Chat Message",
+      "description": "Real-time communication within match/squad.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Highlight": {
+      "title": "Match Highlight",
+      "description": "Winning clips uploaded by stars.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "matchId": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "description": { "type": "string" },
+        "likes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "SupportTicket": {
+      "title": "Support Ticket",
+      "description": "Player reported problems.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Result": {
+      "title": "Battle Result",
+      "description": "Individual performance record for a match.",
+      "type": "object",
+      "properties": {
+        "matchId": { "type": "string" },
+        "userId": { "type": "string" },
+        "playerName": { "type": "string" },
+        "kills": { "type": "number" },
+        "rank": { "type": "number" },
+        "winnings": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Bracket": {
+      "title": "Match Bracket",
+      "description": "Tournament tree and progression rounds.",
+      "type": "object",
+      "properties": {
+        "matchId": { "type": "string" },
+        "rounds": { "type": "array" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "Global player directory." },
+    "/matches/{matchId}": { "schema": "Match", "description": "Live tournament database." },
+    "/matches/{matchId}/registrations/{regId}": { "schema": "Registration", "description": "Active deployment rosters." },
+    "/matches/{matchId}/brackets/{docId}": { "schema": "Bracket", "description": "Match progression tree." },
+    "/matches/{matchId}/chat/{msgId}": { "schema": "ChatMessage", "description": "Tactical squad comms." },
+    "/highlights/{clipId}": { "schema": "Highlight", "description": "Global battle reports and clips." },
+    "/tickets/{ticketId}": { "schema": "SupportTicket", "description": "Protocol violations and support requests." },
+    "/results/{resultId}": { "schema": "Result", "description": "Historical combat records." },
+    "/follows/{followId}": { "schema": { "type": "object", "properties": { "followerId": { "type": "string" }, "followingId": { "type": "string" } } }, "description": "Player network connections." }
+  }
+}

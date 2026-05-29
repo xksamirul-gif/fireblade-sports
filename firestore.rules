@@ -1,0 +1,128 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Checks if the user is one of the Admins (You or your friends)
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+             request.auth.token.email != null && 
+             (request.auth.token.email == 'xksamirul@gmail.com' || request.auth.token.email == 'mahi2007raj@gmail.com');
+    }
+
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. USERS COLLECTION: 
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow list: if isAdmin();
+      allow write: if isAdmin(); 
+      allow create: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // 2. PAYMENTS COLLECTION:
+    match /payments/{paymentId} {
+      allow read: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // 3. MATCHES COLLECTION:
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if isAdmin();
+      
+      match /registrations/{regId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin();
+      }
+
+      match /brackets/{docId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+      
+      match /chat/{msgId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+      }
+    }
+
+    // 4. REGISTRATIONS:
+    match /registrations/{regId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // 5. RESULTS:
+    match /results/{resultId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 6. WITHDRAWALS:
+    match /withdrawals/{withdrawalId} {
+      allow read: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // 7. ADMIN LOGS:
+    match /admin_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 8. HIGHLIGHTS:
+    match /highlights/{highlightId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.userId);
+    }
+
+    // TICKETS:
+    match /tickets/{ticketId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.userId);
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 9. REGISTRATIONS (Global query support):
+    match /{path=**}/registrations/{regId} {
+      allow read: if isSignedIn();
+    }
+
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /system/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /notifications/{notifId} {
+       allow read: if isSignedIn();
+       allow write: if isAdmin();
+    }
+    
+    match /users/{userId}/notifications/{notifId} {
+       allow read: if isSignedIn() && request.auth.uid == userId;
+       allow write: if isAdmin();
+    }
+  }
+}
